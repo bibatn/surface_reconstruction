@@ -30,7 +30,20 @@ $$E_2(X, C) = \sum _{i^{'} \in I} \lambda_{i^{'}}\sum_{i \in I \setminus\{i^{'}\
 
 \section{Параллелизм}
 
-Здесь будет параллельный алгоритм на псевдокоде
+Процедура определения поверхности методом наименьших квадратов была представлена Левином ~\cite{LEVIN}. Параллельный вариант, модифицированного алгоритма MLS с использованием MPI, описан в алгоритме 1. Алгоритм предполагает что облако точек равномерно распределено по всем процессам. Поэтому часть P, доступная локально в процессе u, обозначается через $P^{(u)}$. Через $P_l^{u}$, $P_r^{u}$ обозначены левая и правая граница частей облака точек. Они последовательно получаются от соседних процессов обменами по топологии кольцо. Дополнительных коммуникаций не требуется, а остальные вычисления выполняются локально. В цикле по локальному облаку точек $P^{(u)}$ выполняется процедура проецирования MLS: сначала создается локальная эталонная плоскость H для точки $p_j$. Проекция $p_j$ на H определяет начало координат q. Затем вычисляется локальная полиномиальная аппроксимация g высот $f_j$ точек $p_j$ над H. В обоих случаях вес для каждого из $p_j$ является функцией расстояния до q. Проекция $p_j$ на g является результатом процедуры проецирования MLS. \\*
+\textbf{Algorithm 1}  Parallel moving least squares with MPI \\*
+\textbf{Input:} a data set of points $P = \{p_i\}$ $i = 1..n$ \\*
+\textbf{Output:} a smooth surface SP (MLS surface) based on the input
+points \\*
+1: \textbf{for each} process u \textbf{do} \\*
+2: \quad $P^{(u)} = read(P)$ // each process reads its part of point cloud $P^{(u)} = \{p_j\}$ $j = 1..m$ \\*
+3: \quad $P\_l^{(u)} = send\_recv(P\_r^{(u-1)})$ // getting the left border\\* 
+4: \quad $P\_r^{(u)} = send\_recv(P\_l^{(u+1)})$ // getting the right border\\*
+5: \quad\textbf{for each} point $j = 1..m $ \textbf{do}\\*
+6: \quad\quad$H = generate\_plane(p_j)$ \\*
+7: \quad\quad$g = generate\_local\_polynomial\_approximation(H)$ \\*
+8: \quad\quad$result\_point = project\_on\_polynom(p_j, polynom)$ \\*
+9: \quad\textbf{end for} \\*
 
 
 
